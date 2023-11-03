@@ -17,7 +17,7 @@ import time
 import os
 
 parser = argparse.ArgumentParser("HSI")
-parser.add_argument('--dataset', choices=['Indian', 'Pavia', 'Houston'], default='Indian', help='dataset to use')
+parser.add_argument('--dataset', choices=['Indian', 'Pavia', 'Houston', 'Custom'], default='Indian', help='dataset to use')
 parser.add_argument('--flag_test', choices=['test', 'train'], default='train', help='testing mark')
 parser.add_argument('--mode', choices=['ViT', 'CAF'], default='ViT', help='mode choice')
 parser.add_argument('--gpu_id', default='0', help='gpu id')
@@ -283,7 +283,7 @@ def cal_results(matrix):
     shape = np.shape(matrix)
     number = 0
     sum = 0
-    AA = np.zeros([shape[0]], dtype=np.float)
+    AA = np.zeros([shape[0]], dtype=float)
     for i in range(shape[0]):
         number += matrix[i, i]
         AA[i] = matrix[i, i] / np.sum(matrix[i, :])
@@ -307,6 +307,8 @@ elif args.dataset == 'Pavia':
     data = loadmat('./data/Pavia.mat')
 elif args.dataset == 'Houston':
     data = loadmat('./data/Houston.mat')
+elif args.dataset == 'Custom':
+    data = loadmat('./data/custom_data.mat')
 else:
     raise ValueError("Unkknow dataset")
 color_mat = loadmat('./data/AVIRIS_colormap.mat')
@@ -399,7 +401,6 @@ elif args.flag_test == 'train':
     print("start training")
     tic = time.time()
     for epoch in range(args.epoches): 
-        scheduler.step()
 
         # train model
         model.train()
@@ -408,7 +409,8 @@ elif args.flag_test == 'train':
         print("Epoch: {:03d} train_loss: {:.4f} train_acc: {:.4f}"
                         .format(epoch+1, train_obj, train_acc))
         
-
+        optimizer.step()
+        scheduler.step()
         if (epoch % args.test_freq == 0) | (epoch == args.epoches - 1):         
             model.eval()
             tar_v, pre_v = valid_epoch(model, label_test_loader, criterion, optimizer)
