@@ -402,7 +402,7 @@ elif args.flag_test == 'train':
     print("Start training")
     tic = time.time()
 
-    # Load the latest model state if it exists
+    # Load the latest model state if it exist
     if os.path.exists(model_state_path):
         print("Loading the latest model state for continuous training...")
         model.load_state_dict(torch.load(model_state_path))
