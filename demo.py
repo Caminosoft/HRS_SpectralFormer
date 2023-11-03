@@ -375,11 +375,11 @@ scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.epoches//1
 #-------------------------------------------------------------------------------
 if args.flag_test == 'test':
     if args.mode == 'ViT':
-        model.load_state_dict(torch.load('./ViT.pt'))      
+        model.load_state_dict(torch.load('./log/ViT.pt'))
     elif (args.mode == 'CAF') & (args.patches == 1):
-        model.load_state_dict(torch.load('./SpectralFormer_pixel.pt'))
+        model.load_state_dict(torch.load('./log/SpectralFormer_pixel_indian.pt'))
     elif (args.mode == 'CAF') & (args.patches == 7):
-        model.load_state_dict(torch.load('./SpectralFormer_patch.pt'))
+        model.load_state_dict(torch.load('./log/SpectralFormer_pixel_indian.pt'))
     else:
         raise ValueError("Wrong Parameters") 
     model.eval()
