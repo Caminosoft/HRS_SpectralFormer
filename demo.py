@@ -429,7 +429,7 @@ elif args.flag_test == 'train':
         if (epoch % args.test_freq == 0) or (epoch == args.epoches - 1):
             model.eval()
             tar_v, pre_v = valid_epoch(model, label_test_loader, criterion, optimizer)
-            OA2, AA_mean2, Kappa2, AA2 = output_metric(tar_v, pre_v))
+            OA2, AA_mean2, Kappa2, AA2 = output_metric(tar_v, pre_v)
 
 print("Final result:")
 print("OA: {:.4f} | AA: {:.4f} | Kappa: {:.4f}".format(OA2, AA_mean2, Kappa2))
