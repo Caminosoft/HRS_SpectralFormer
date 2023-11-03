@@ -372,6 +372,7 @@ criterion = nn.CrossEntropyLoss().cuda()
 # optimizer
 optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.epoches//10, gamma=args.gamma)
+model_state_path = './log/custom_model_state.pt'
 #-------------------------------------------------------------------------------
 if args.flag_test == 'test':
     if args.mode == 'ViT':
@@ -398,27 +399,37 @@ if args.flag_test == 'test':
     plt.show()
     savemat('matrix.mat',{'P':prediction_matrix, 'label':label})
 elif args.flag_test == 'train':
-    print("start training")
+    print("Start training")
     tic = time.time()
-    for epoch in range(args.epoches): 
 
-        # train model
-        model.train()
+    # Load the latest model state if it exists
+    if os.path.exists(model_state_path):
+        print("Loading the latest model state for continuous training...")
+        model.load_state_dict(torch.load(model_state_path))
+    else:
+        print("No existing model state found. Initiating model training from scratch...")
+
+    # Training loop
+    for epoch in range(args.epoches):
+        model.train()  # Set the model to training mode
+
+        # Train the model
         train_acc, train_obj, tar_t, pre_t = train_epoch(model, label_train_loader, criterion, optimizer)
-        OA1, AA_mean1, Kappa1, AA1 = output_metric(tar_t, pre_t) 
+        OA1, AA_mean1, Kappa1, AA1 = output_metric(tar_t, pre_t)
+
         print("Epoch: {:03d} train_loss: {:.4f} train_acc: {:.4f}"
-                        .format(epoch+1, train_obj, train_acc))
-        
+              .format(epoch + 1, train_obj, train_acc))
+
         optimizer.step()
         scheduler.step()
-        if (epoch % args.test_freq == 0) | (epoch == args.epoches - 1):         
+
+        # Save the model state at the end of each epoch
+        torch.save(model.state_dict(), model_state_path)
+
+        if (epoch % args.test_freq == 0) or (epoch == args.epoches - 1):
             model.eval()
             tar_v, pre_v = valid_epoch(model, label_test_loader, criterion, optimizer)
-            OA2, AA_mean2, Kappa2, AA2 = output_metric(tar_v, pre_v)
-
-    toc = time.time()
-    print("Running Time: {:.2f}".format(toc-tic))
-    print("**************************************************")
+            OA2, AA_mean2, Kappa2, AA2 = output_metric(tar_v, pre_v))
 
 print("Final result:")
 print("OA: {:.4f} | AA: {:.4f} | Kappa: {:.4f}".format(OA2, AA_mean2, Kappa2))
