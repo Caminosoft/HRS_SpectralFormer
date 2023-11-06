@@ -387,7 +387,9 @@ scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.epoches//1
 model_state_path = './log/custom_model_state.pt'
 #-------------------------------------------------------------------------------
 if args.flag_test == 'test':
-    if args.mode == 'ViT':
+    if (args.dataset == 'Custom'):
+        model.load_state_dict(torch.load(model_state_path))
+    elif args.mode == 'ViT':
         model.load_state_dict(torch.load('./log/ViT.pt'))
     elif (args.mode == 'CAF') and (args.patches == 1):
         model.load_state_dict(torch.load('./log/SpectralFormer_pixel_indian.pt'))
@@ -431,9 +433,11 @@ elif args.flag_test == 'train':
         scheduler.step()
 
         # Save the model state at the end of each epoch
-        save_model_state(model, model_state_path)
+        # save_model_state(model, model_state_path)
 
         if (epoch % args.test_freq == 0) or (epoch == args.epoches - 1):
+            # Save the model state at the end of each epoch
+            save_model_state(model, model_state_path)
             model.eval()
             tar_v, pre_v = valid_epoch(model, label_test_loader, criterion, optimizer)
             OA2, AA_mean2, Kappa2, AA2 = output_metric(tar_v, pre_v)
