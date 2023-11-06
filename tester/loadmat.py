@@ -40,11 +40,12 @@ def compare_mat_files(file1_path, file2_path):
 
 
 # Example usage
-file1_path = "/home/einn10184/PycharmProjects/IEEE_TGRS_SpectralFormer/data/matrix.mat"
-file2_path = "/home/einn10184/PycharmProjects/IEEE_TGRS_SpectralFormer/data/AVIRIS_colormap.mat"
+prediction_matrix = "/home/einn10184/PycharmProjects/IEEE_TGRS_SpectralFormer/data/matrix.mat"
+file2_path = "/home/einn10184/PycharmProjects/IEEE_TGRS_SpectralFormer/data/combined_data.mat"
+colormap = "/home/einn10184/PycharmProjects/IEEE_TGRS_SpectralFormer/data/AVIRIS_colormap.mat"
 
 # Load the content of the .mat files
-data1 = load_mat_file(file1_path)
+data1 = load_mat_file(prediction_matrix)
 data2 = load_mat_file(file2_path)
 
 
@@ -74,7 +75,7 @@ def getColors(file: str):
 def compare(input):
     print("prediction has shape ", input['P'].shape)
     print("original label has shape ", input['label'].shape)
-    color_matrix = getColors(file2_path)
+    color_matrix = getColors(colormap)
 
     label = input['label']
     prediction = input['P']
