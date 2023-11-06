@@ -295,6 +295,18 @@ def cal_results(matrix):
     return OA, AA_mean, Kappa, AA
 #-------------------------------------------------------------------------------
 # Parameter Setting
+def load_model_state(model, model_state_path):
+    if os.path.exists(model_state_path):
+        print("Loading the latest model state for continuous training...")
+        model.load_state_dict(torch.load(model_state_path))
+    else:
+        print("No existing model state found. Initiating model training from scratch.")
+
+# Define the function to save the model state
+def save_model_state(model, model_state_path):
+    torch.save(model.state_dict(), model_state_path)
+    print(f"Model state saved at {model_state_path}")
+
 np.random.seed(args.seed)
 torch.manual_seed(args.seed)
 torch.cuda.manual_seed(args.seed)
@@ -377,9 +389,9 @@ model_state_path = './log/custom_model_state.pt'
 if args.flag_test == 'test':
     if args.mode == 'ViT':
         model.load_state_dict(torch.load('./log/ViT.pt'))
-    elif (args.mode == 'CAF') & (args.patches == 1):
+    elif (args.mode == 'CAF') and (args.patches == 1):
         model.load_state_dict(torch.load('./log/SpectralFormer_pixel_indian.pt'))
-    elif (args.mode == 'CAF') & (args.patches == 7):
+    elif (args.mode == 'CAF') and (args.patches == 7):
         model.load_state_dict(torch.load('./log/SpectralFormer_pixel_indian.pt'))
     else:
         raise ValueError("Wrong Parameters") 
@@ -387,7 +399,7 @@ if args.flag_test == 'test':
     tar_v, pre_v = valid_epoch(model, label_test_loader, criterion, optimizer)
     OA2, AA_mean2, Kappa2, AA2 = output_metric(tar_v, pre_v)
 
-    # output classification maps
+    # Output classification maps
     pre_u = test_epoch(model, label_true_loader, criterion, optimizer)
     prediction_matrix = np.zeros((height, width), dtype=float)
     for i in range(total_pos_true.shape[0]):
@@ -402,12 +414,7 @@ elif args.flag_test == 'train':
     print("Start training")
     tic = time.time()
 
-    # Load the latest model state if it exist
-    if os.path.exists(model_state_path):
-        print("Loading the latest model state for continuous training...")
-        model.load_state_dict(torch.load(model_state_path))
-    else:
-        print("No existing model state found. Initiating model training from scratch...")
+    load_model_state(model, model_state_path)  # Load the model state (if exists)
 
     # Training loop
     for epoch in range(args.epoches):
@@ -424,7 +431,7 @@ elif args.flag_test == 'train':
         scheduler.step()
 
         # Save the model state at the end of each epoch
-        torch.save(model.state_dict(), model_state_path)
+        save_model_state(model, model_state_path)
 
         if (epoch % args.test_freq == 0) or (epoch == args.epoches - 1):
             model.eval()
