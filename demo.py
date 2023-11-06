@@ -411,7 +411,8 @@ if args.flag_test == 'test':
     plt.xticks([])
     plt.yticks([])
     plt.show()
-    savemat('matrix.mat',{'P':prediction_matrix, 'label':label})
+    savemat('./data/matrix.mat',{'P':prediction_matrix, 'label':label})
+    plt.savefig('./data/testplot.png')
 elif args.flag_test == 'train':
     print("Start training")
     tic = time.time()
