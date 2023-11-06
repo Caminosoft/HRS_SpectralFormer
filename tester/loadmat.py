@@ -39,7 +39,7 @@ def compare_mat_files(file1_path, file2_path):
 
 
 # Example usage
-file1_path = "/home/einn10184/PycharmProjects/IEEE_TGRS_SpectralFormer/data/IndianPine.mat"
+file1_path = "/home/einn10184/PycharmProjects/IEEE_TGRS_SpectralFormer/data/matrix.mat"
 file2_path = "/home/einn10184/PycharmProjects/IEEE_TGRS_SpectralFormer/data/combined_data.mat"
 
 # Load the content of the .mat files
@@ -63,9 +63,28 @@ def explain(input):
     plt.axis('on')
     plt.colorbar()
     plt.show()
+def compare(input):
+    print("prediction has shape ", input['P'].shape)
+    print("original label has shape ", input['label'].shape)
+
+    label = input['label']
+    prediction = input['P']
+    # Subplot 2: Label
+    plt.subplot(1, 2, 1)
+    plt.imshow(label, cmap='rainbow')
+    plt.title("Label")
+    plt.colorbar()
+
+    # Subplot 3: Prediction Comparison
+    plt.subplot(1, 2, 2)
+    plt.imshow(prediction, cmap='rainbow')
+    plt.title("Prediction")
+    plt.colorbar()
+
+    plt.tight_layout()
+
+    plt.show()
 
 
 # Print results
-print("Content of file1.mat:", explain(data1))
-# print("Content of file2.mat:", explain(data2))
-# print("Are the files equal?", are_files_equal)
+print("Content of matrix.mat:", compare(data1))
