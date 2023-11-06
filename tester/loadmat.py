@@ -1,5 +1,6 @@
 import sys
 
+from matplotlib import colors
 from scipy.io import loadmat
 import numpy as np
 import matplotlib.pyplot as plt
@@ -40,7 +41,7 @@ def compare_mat_files(file1_path, file2_path):
 
 # Example usage
 file1_path = "/home/einn10184/PycharmProjects/IEEE_TGRS_SpectralFormer/data/matrix.mat"
-file2_path = "/home/einn10184/PycharmProjects/IEEE_TGRS_SpectralFormer/data/combined_data.mat"
+file2_path = "/home/einn10184/PycharmProjects/IEEE_TGRS_SpectralFormer/data/AVIRIS_colormap.mat"
 
 # Load the content of the .mat files
 data1 = load_mat_file(file1_path)
@@ -63,21 +64,29 @@ def explain(input):
     plt.axis('on')
     plt.colorbar()
     plt.show()
+
+
+def getColors(file: str):
+    file = load_mat_file(file)
+    return file['mycolormap']
+
+
 def compare(input):
     print("prediction has shape ", input['P'].shape)
     print("original label has shape ", input['label'].shape)
+    color_matrix = getColors(file2_path)
 
     label = input['label']
     prediction = input['P']
     # Subplot 2: Label
     plt.subplot(1, 2, 1)
-    plt.imshow(label, cmap='rainbow')
+    plt.imshow(label, colors.ListedColormap(color_matrix))
     plt.title("Label")
     plt.colorbar()
 
     # Subplot 3: Prediction Comparison
     plt.subplot(1, 2, 2)
-    plt.imshow(prediction, cmap='rainbow')
+    plt.imshow(prediction, colors.ListedColormap(color_matrix))
     plt.title("Prediction")
     plt.colorbar()
 
@@ -88,3 +97,4 @@ def compare(input):
 
 # Print results
 print("Content of matrix.mat:", compare(data1))
+# print("Content of matrix.mat:", data2['mycolormap'].shape)
