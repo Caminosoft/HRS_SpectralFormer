@@ -305,7 +305,7 @@ def load_model_state(model, model_state_path):
 # Define the function to save the model state
 def save_model_state(model, model_state_path):
     torch.save(model.state_dict(), model_state_path)
-    print(f"Model state saved at {model_state_path}")
+    print(f"\rModel state saved at {model_state_path}", end='', flush=True)
 
 np.random.seed(args.seed)
 torch.manual_seed(args.seed)
@@ -427,8 +427,8 @@ elif args.flag_test == 'train':
         train_acc, train_obj, tar_t, pre_t = train_epoch(model, label_train_loader, criterion, optimizer)
         OA1, AA_mean1, Kappa1, AA1 = output_metric(tar_t, pre_t)
 
-        print("Epoch: {:03d} train_loss: {:.4f} train_acc: {:.4f}"
-              .format(epoch + 1, train_obj, train_acc))
+        print("\rEpoch: {:03d} train_loss: {:.4f} train_acc: {:.4f}"
+              .format(epoch + 1, train_obj, train_acc), end='', flush=True)
 
         optimizer.step()
         scheduler.step()
