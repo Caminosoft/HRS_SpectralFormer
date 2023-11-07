@@ -415,7 +415,7 @@ def perform_inference(model, label_test_loader, label_true_loader, height, width
 
     savemat(mat_filename, {'P': prediction_matrix, 'label': label})
     plt.savefig(png_filename)
-
+    print("\n-------------Successfully performed inference---------------------")
     return OA2, AA_mean2, Kappa2, AA2
 
 
