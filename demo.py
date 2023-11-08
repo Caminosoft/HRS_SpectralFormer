@@ -9,6 +9,7 @@ from torch import optim
 from torch.autograd import Variable
 from vit_pytorch import ViT
 from sklearn.metrics import confusion_matrix
+from .helpers.inference import *
 
 import matplotlib.pyplot as plt
 from matplotlib import colors
@@ -18,7 +19,7 @@ import os
 
 parser = argparse.ArgumentParser("HSI")
 parser.add_argument('--dataset', choices=['Indian', 'Pavia', 'Houston', 'Custom'], default='Indian', help='dataset to use')
-parser.add_argument('--flag_test', choices=['test', 'train'], default='train', help='testing mark')
+parser.add_argument('--flag_test', choices=['test', 'train', 'inference'], default='train', help='testing mark')
 parser.add_argument('--mode', choices=['ViT', 'CAF'], default='ViT', help='mode choice')
 parser.add_argument('--gpu_id', default='0', help='gpu id')
 parser.add_argument('--seed', type=int, default=0, help='number of seed')
@@ -320,7 +321,8 @@ elif args.dataset == 'Pavia':
 elif args.dataset == 'Houston':
     data = loadmat('./data/Houston.mat')
 elif args.dataset == 'Custom':
-    data = loadmat('./data/custom_data.mat')
+    dataset_path = input("Enter the Custom Dataset Path:")
+    data = loadmat(dataset_path)
 else:
     raise ValueError("Unkknow dataset")
 color_mat = loadmat('./data/AVIRIS_colormap.mat')
@@ -385,40 +387,6 @@ criterion = nn.CrossEntropyLoss().cuda()
 optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.epoches//10, gamma=args.gamma)
 model_state_path = './log/custom_model_state.pt'
-#-------------------------------------------------------------------------------
-
-def perform_inference(model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, dataset_name):
-    # Load the trained model
-    model.load_state_dict(torch.load(model_state_path))
-    model.eval()
-
-    # Validate and get performance metrics
-    tar_v, pre_v = valid_epoch(model, label_test_loader, criterion, optimizer)
-    OA2, AA_mean2, Kappa2, AA2 = output_metric(tar_v, pre_v)
-
-    # Test and create prediction matrix
-    pre_u = test_epoch(model, label_true_loader, criterion, optimizer)
-    prediction_matrix = np.zeros((height, width), dtype=float)
-    for i in range(total_pos_true.shape[0]):
-        prediction_matrix[total_pos_true[i, 0], total_pos_true[i, 1]] = pre_u[i] + 1
-
-    plt.subplot(1, 1, 1)
-    plt.imshow(prediction_matrix, colors.ListedColormap(color_matrix))
-    plt.xticks([])
-    plt.yticks([])
-    plt.show()
-
-    output_dir = './output/'  # Directory to store output files
-    os.makedirs(output_dir, exist_ok=True)  # Creates the output directory if it doesn't exist
-    mat_filename = output_dir + 'matrix_' + dataset_name + '.mat'
-    png_filename = output_dir + 'classification_' + dataset_name + '.png'
-
-    savemat(mat_filename, {'P': prediction_matrix, 'label': label})
-    plt.savefig(png_filename)
-    print("\n-------------Successfully performed inference---------------------")
-    return OA2, AA_mean2, Kappa2, AA2
-
-
 
 #-------------------------------------------------------------------------------
 if args.flag_test == 'test':
@@ -469,21 +437,19 @@ elif args.flag_test == 'train':
         optimizer.step()
         scheduler.step()
 
-        # Save the model state at the end of each epoch
-        # save_model_state(model, model_state_path)
-
         if (epoch % args.test_freq == 0) or (epoch == args.epoches - 1):
             # Save the model state at the end of each epoch
             save_model_state(model, model_state_path)
             model.eval()
             tar_v, pre_v = valid_epoch(model, label_test_loader, criterion, optimizer)
             OA2, AA_mean2, Kappa2, AA2 = output_metric(tar_v, pre_v)
-
-
-dataset_name = 'Custom'  # Example dataset name
-performance_metrics = perform_inference(model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, dataset_name)
-
-print(performance_metrics)
+elif args.flag_test == 'inference':
+    print("inference Started")
+    if (args.dataset == 'Custom'):
+        performance_metrics = perform_inference(model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, dataset_name)
+        print(performance_metrics)
+    else:
+        print("Custom did not loaded")
 
 
 print("Final result:")
