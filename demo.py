@@ -55,71 +55,79 @@ elif args.dataset == 'Custom':
     data = loadmat(dataset_path)
 else:
     raise ValueError("Unkknow dataset")
-color_mat = loadmat('./data/AVIRIS_colormap.mat')
-TR = data['TR']
-TE = data['TE']
-input = data['input'] #(145,145,200)
-label = TR + TE
-num_classes = np.max(TR)
+def function_requirement(flag):
+    color_mat = loadmat('./data/AVIRIS_colormap.mat')
+    TR = data['TR']
+    TE = data['TE']
+    input = data['input'] #(145,145,200)
+    label = TR + TE
+    num_classes = np.max(TR)
 
-color_mat_list = list(color_mat)
-color_matrix = color_mat[color_mat_list[3]] #(17,3)
-# normalize data by band norm
-input_normalize = np.zeros(input.shape)
-for i in range(input.shape[2]):
-    input_max = np.max(input[:,:,i])
-    input_min = np.min(input[:,:,i])
-    input_normalize[:,:,i] = (input[:,:,i]-input_min)/(input_max-input_min)
-# data size
-height, width, band = input.shape
-print("height={0},width={1},band={2}".format(height, width, band))
-#-------------------------------------------------------------------------------
-# obtain train and test data
-total_pos_train, total_pos_test, total_pos_true, number_train, number_test, number_true = chooose_train_and_test_point(TR, TE, label, num_classes)
-mirror_image = mirror_hsi(height, width, band, input_normalize, patch=args.patches)
-x_train_band, x_test_band, x_true_band = train_and_test_data(mirror_image, band, total_pos_train, total_pos_test, total_pos_true, patch=args.patches, band_patch=args.band_patches)
-y_train, y_test, y_true = train_and_test_label(number_train, number_test, number_true, num_classes)
-#-------------------------------------------------------------------------------
-# load data
-x_train=torch.from_numpy(x_train_band.transpose(0,2,1)).type(torch.FloatTensor) #[695, 200, 7, 7]
-y_train=torch.from_numpy(y_train).type(torch.LongTensor) #[695]
-Label_train=Data.TensorDataset(x_train,y_train)
-x_test=torch.from_numpy(x_test_band.transpose(0,2,1)).type(torch.FloatTensor) # [9671, 200, 7, 7]
-y_test=torch.from_numpy(y_test).type(torch.LongTensor) # [9671]
-Label_test=Data.TensorDataset(x_test,y_test)
-x_true=torch.from_numpy(x_true_band.transpose(0,2,1)).type(torch.FloatTensor)
-y_true=torch.from_numpy(y_true).type(torch.LongTensor)
-Label_true=Data.TensorDataset(x_true,y_true)
+    color_mat_list = list(color_mat)
+    color_matrix = color_mat[color_mat_list[3]] #(17,3)
+    # normalize data by band norm
+    input_normalize = np.zeros(input.shape)
+    for i in range(input.shape[2]):
+        input_max = np.max(input[:,:,i])
+        input_min = np.min(input[:,:,i])
+        input_normalize[:,:,i] = (input[:,:,i]-input_min)/(input_max-input_min)
+    # data size
+    height, width, band = input.shape
+    print("height={0},width={1},band={2}".format(height, width, band))
+    #-------------------------------------------------------------------------------
+    # obtain train and test data
+    total_pos_train, total_pos_test, total_pos_true, number_train, number_test, number_true = chooose_train_and_test_point(TR, TE, label, num_classes)
+    mirror_image = mirror_hsi(height, width, band, input_normalize, patch=args.patches)
+    x_train_band, x_test_band, x_true_band = train_and_test_data(mirror_image, band, total_pos_train, total_pos_test, total_pos_true, patch=args.patches, band_patch=args.band_patches)
+    y_train, y_test, y_true = train_and_test_label(number_train, number_test, number_true, num_classes)
+    #-------------------------------------------------------------------------------
+    # load data
+    x_train=torch.from_numpy(x_train_band.transpose(0,2,1)).type(torch.FloatTensor) #[695, 200, 7, 7]
+    y_train=torch.from_numpy(y_train).type(torch.LongTensor) #[695]
+    Label_train=Data.TensorDataset(x_train,y_train)
+    x_test=torch.from_numpy(x_test_band.transpose(0,2,1)).type(torch.FloatTensor) # [9671, 200, 7, 7]
+    y_test=torch.from_numpy(y_test).type(torch.LongTensor) # [9671]
+    Label_test=Data.TensorDataset(x_test,y_test)
+    x_true=torch.from_numpy(x_true_band.transpose(0,2,1)).type(torch.FloatTensor)
+    y_true=torch.from_numpy(y_true).type(torch.LongTensor)
+    Label_true=Data.TensorDataset(x_true,y_true)
 
-label_train_loader=Data.DataLoader(Label_train,batch_size=args.batch_size,shuffle=True)
-label_test_loader=Data.DataLoader(Label_test,batch_size=args.batch_size,shuffle=True)
-label_true_loader=Data.DataLoader(Label_true,batch_size=100,shuffle=False)
+    label_train_loader=Data.DataLoader(Label_train,batch_size=args.batch_size,shuffle=True)
+    label_test_loader=Data.DataLoader(Label_test,batch_size=args.batch_size,shuffle=True)
+    label_true_loader=Data.DataLoader(Label_true,batch_size=100,shuffle=False)
 
-#-------------------------------------------------------------------------------
-# create model
-model = ViT(
-    image_size = args.patches,
-    near_band = args.band_patches,
-    num_patches = band,
-    num_classes = num_classes,
-    dim = 64,
-    depth = 5,
-    heads = 4,
-    mlp_dim = 8,
-    dropout = 0.1,
-    emb_dropout = 0.1,
-    mode = args.mode
-)
-model = model.cuda()
-# criterion
-criterion = nn.CrossEntropyLoss().cuda()
-# optimizer
-optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.epoches//10, gamma=args.gamma)
-model_state_path = './log/custom_model_state.pt'
+    #-------------------------------------------------------------------------------
+    # create model
+    model = ViT(
+        image_size = args.patches,
+        near_band = args.band_patches,
+        num_patches = band,
+        num_classes = num_classes,
+        dim = 64,
+        depth = 5,
+        heads = 4,
+        mlp_dim = 8,
+        dropout = 0.1,
+        emb_dropout = 0.1,
+        mode = args.mode
+    )
+    model = model.cuda()
+    # criterion
+    criterion = nn.CrossEntropyLoss().cuda()
+    # optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.epoches//10, gamma=args.gamma)
+    model_state_path = './log/custom_model_state.pt'
 
+    if (flag == 'test'):
+        return model_state_path, model, label_test_loader, criterion, optimizer, height, width, label_true_loader, total_pos_true, color_matrix, label
+    elif (flag == 'train'):
+        return model, model_state_path, label_train_loader, criterion, optimizer, scheduler, label_test_loader
+    elif (flag == 'inference'):
+        return model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, criterion, optimizer
 #-------------------------------------------------------------------------------
 if args.flag_test == 'test':
+    model_state_path, model, label_test_loader, criterion, optimizer, height, width, label_true_loader, total_pos_true, color_matrix, label = function_requirement(args.flag_test)
     if (args.dataset == 'Custom'):
         model.load_state_dict(torch.load(model_state_path))
     elif args.mode == 'ViT':
@@ -148,6 +156,7 @@ if args.flag_test == 'test':
     plt.savefig('./data/testplot.png')
 
 elif args.flag_test == 'train':
+    model, model_state_path, label_train_loader, criterion, optimizer, scheduler, label_test_loader = function_requirement(args.flag_test)
     print("Start training")
     tic = time.time()
 
@@ -181,7 +190,7 @@ elif args.flag_test == 'inference':
     # else:
     #     print("Custom did not loaded")
     #     exit()
-        
+    model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, criterion, optimizer = function_requirement(args.flag_test)
     print("Inference Started")
     if args.dataset == 'Custom':
         dataset_dir = args.dataset_dir  # Directory containing custom datasets
@@ -189,8 +198,15 @@ elif args.flag_test == 'inference':
 
         for dataset_file in dataset_files:
             print(f"Processing dataset: {dataset_file}")
+            data = loadmat(dataset_file)
+            # Extract necessary data from the loaded file
+            # Data Preparation
+            # Modify the perform_inference call to include the dataset_file as the dataset name
             OA2, AA_mean2, Kappa2, AA2 = perform_inference(model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, dataset_file, criterion, optimizer)
-            
+
+            print(f"Result for {dataset_file}")
+            print("OA: {:.4f} | AA: {:.4f} | Kappa: {:.4f}".format(OA2, AA_mean2, Kappa2))
+
         print("Inference Completed")
     else:
         print("Custom dataset directory not provided")
