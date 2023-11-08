@@ -184,13 +184,6 @@ elif args.flag_test == 'train':
             tar_v, pre_v = valid_epoch(model, label_test_loader, criterion, optimizer)
             OA2, AA_mean2, Kappa2, AA2 = output_metric(tar_v, pre_v)
 elif args.flag_test == 'inference':
-    # print("inference Started")
-    # if (args.dataset == 'Custom'):
-    #     performance_metrics = perform_inference(model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, "Custom", criterion, optimizer)
-    #     print(performance_metrics)
-    # else:
-    #     print("Custom did not loaded")
-    #     exit()
     print("Inference Started")
     if args.dataset == 'Custom':
         dataset_dir = args.dataset_dir  # Directory containing custom datasets
@@ -200,11 +193,12 @@ elif args.flag_test == 'inference':
             print(f"Processing dataset: {dataset_file}")
             data = loadmat(dataset_file)
             model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, criterion, optimizer = function_requirement(args.flag_test, data)
-            # Extract necessary data from the loaded file
-            # Data Preparation
-            # Modify the perform_inference call to include the dataset_file as the dataset name
-            print(f"-----------------------------------{dataset_file}-----------------------")
-            OA2, AA_mean2, Kappa2, AA2 = perform_inference(model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, "Custom", criterion, optimizer)
+            dataset_path = dataset_file
+            file_name_with_extension = os.path.basename(dataset_path)  
+            file_name = os.path.splitext(file_name_with_extension)[0]
+
+
+            OA2, AA_mean2, Kappa2, AA2 = perform_inference(model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, file_name, criterion, optimizer)
 
             print(f"Result for {dataset_file}")
             print("OA: {:.4f} | AA: {:.4f} | Kappa: {:.4f}".format(OA2, AA_mean2, Kappa2))
