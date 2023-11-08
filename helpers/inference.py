@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib import colors
 import os 
 from scipy.io import savemat
-from utils import valid_epoch, output_metric, test_epoch
+from .utils import valid_epoch, output_metric, test_epoch
 
 
 def perform_inference(model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, dataset_name, criterion, optimizer):

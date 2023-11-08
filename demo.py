@@ -175,8 +175,7 @@ elif args.flag_test == 'train':
 elif args.flag_test == 'inference':
     print("inference Started")
     if (args.dataset == 'Custom'):
-        performance_metrics = perform_inference(model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, "Custom", criterion, optimizer)
-        print(performance_metrics)
+        OA2, AA_mean2, Kappa2, AA2 = perform_inference(model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, "Custom", criterion, optimizer)
     else:
         print("Custom did not loaded")
         exit()
