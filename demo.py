@@ -203,7 +203,8 @@ elif args.flag_test == 'inference':
             # Extract necessary data from the loaded file
             # Data Preparation
             # Modify the perform_inference call to include the dataset_file as the dataset name
-            OA2, AA_mean2, Kappa2, AA2 = perform_inference(model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, dataset_file, criterion, optimizer)
+            print(f"-----------------------------------{dataset_file}-----------------------")
+            OA2, AA_mean2, Kappa2, AA2 = perform_inference(model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, "Custom", criterion, optimizer)
 
             print(f"Result for {dataset_file}")
             print("OA: {:.4f} | AA: {:.4f} | Kappa: {:.4f}".format(OA2, AA_mean2, Kappa2))
