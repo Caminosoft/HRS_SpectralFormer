@@ -20,6 +20,7 @@ import os
 
 parser = argparse.ArgumentParser("HSI")
 parser.add_argument('--dataset', choices=['Indian', 'Pavia', 'Houston', 'Custom'], default='Indian', help='dataset to use')
+parser.add_argument('--dataset_dir', type=str, default='./custom_datasets', help='Directory containing custom datasets')
 parser.add_argument('--flag_test', choices=['test', 'train', 'inference'], default='train', help='testing mark')
 parser.add_argument('--mode', choices=['ViT', 'CAF'], default='ViT', help='mode choice')
 parser.add_argument('--gpu_id', default='0', help='gpu id')
@@ -173,12 +174,26 @@ elif args.flag_test == 'train':
             tar_v, pre_v = valid_epoch(model, label_test_loader, criterion, optimizer)
             OA2, AA_mean2, Kappa2, AA2 = output_metric(tar_v, pre_v)
 elif args.flag_test == 'inference':
-    print("inference Started")
-    if (args.dataset == 'Custom'):
-        OA2, AA_mean2, Kappa2, AA2 = perform_inference(model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, "Custom", criterion, optimizer)
+    # print("inference Started")
+    # if (args.dataset == 'Custom'):
+    #     performance_metrics = perform_inference(model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, "Custom", criterion, optimizer)
+    #     print(performance_metrics)
+    # else:
+    #     print("Custom did not loaded")
+    #     exit()
+        
+    print("Inference Started")
+    if args.dataset == 'Custom':
+        dataset_dir = args.dataset_dir  # Directory containing custom datasets
+        dataset_files = [os.path.join(dataset_dir, file) for file in os.listdir(dataset_dir) if file.endswith('.mat')]
+
+        for dataset_file in dataset_files:
+            print(f"Processing dataset: {dataset_file}")
+            OA2, AA_mean2, Kappa2, AA2 = perform_inference(model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, dataset_file, criterion, optimizer)
+            
+        print("Inference Completed")
     else:
-        print("Custom did not loaded")
-        exit()
+        print("Custom dataset directory not provided")
 
 
 print("Final result:")
