@@ -51,11 +51,12 @@ elif args.dataset == 'Pavia':
 elif args.dataset == 'Houston':
     data = loadmat('./data/Houston.mat')
 elif args.dataset == 'Custom':
-    dataset_path = input("Enter the Custom Dataset Path:")
-    data = loadmat(dataset_path)
+    # dataset_path = input("Enter the Custom Dataset Path:")
+    # data = loadmat(dataset_path)
+    pass
 else:
     raise ValueError("Unkknow dataset")
-def function_requirement(flag):
+def function_requirement(flag, data):
     color_mat = loadmat('./data/AVIRIS_colormap.mat')
     TR = data['TR']
     TE = data['TE']
@@ -127,7 +128,7 @@ def function_requirement(flag):
         return model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, criterion, optimizer
 #-------------------------------------------------------------------------------
 if args.flag_test == 'test':
-    model_state_path, model, label_test_loader, criterion, optimizer, height, width, label_true_loader, total_pos_true, color_matrix, label = function_requirement(args.flag_test)
+    model_state_path, model, label_test_loader, criterion, optimizer, height, width, label_true_loader, total_pos_true, color_matrix, label = function_requirement(args.flag_test, data)
     if (args.dataset == 'Custom'):
         model.load_state_dict(torch.load(model_state_path))
     elif args.mode == 'ViT':
@@ -156,7 +157,7 @@ if args.flag_test == 'test':
     plt.savefig('./data/testplot.png')
 
 elif args.flag_test == 'train':
-    model, model_state_path, label_train_loader, criterion, optimizer, scheduler, label_test_loader = function_requirement(args.flag_test)
+    model, model_state_path, label_train_loader, criterion, optimizer, scheduler, label_test_loader = function_requirement(args.flag_test, data)
     print("Start training")
     tic = time.time()
 
@@ -190,7 +191,6 @@ elif args.flag_test == 'inference':
     # else:
     #     print("Custom did not loaded")
     #     exit()
-    model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, criterion, optimizer = function_requirement(args.flag_test)
     print("Inference Started")
     if args.dataset == 'Custom':
         dataset_dir = args.dataset_dir  # Directory containing custom datasets
@@ -199,6 +199,7 @@ elif args.flag_test == 'inference':
         for dataset_file in dataset_files:
             print(f"Processing dataset: {dataset_file}")
             data = loadmat(dataset_file)
+            model, label_test_loader, label_true_loader, height, width, total_pos_true, color_matrix, label, model_state_path, criterion, optimizer = function_requirement(args.flag_test, data)
             # Extract necessary data from the loaded file
             # Data Preparation
             # Modify the perform_inference call to include the dataset_file as the dataset name
