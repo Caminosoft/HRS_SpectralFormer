@@ -3,3 +3,7 @@
 __pycache__
 sfm-env/
 .idea/
+./log/custom_model_state.pt
+./output/classification_philip_data.png
+./output/matrix_philip_data.mat
+output/

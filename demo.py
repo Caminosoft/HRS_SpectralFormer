@@ -157,6 +157,7 @@ if args.flag_test == 'test':
     plt.savefig('./data/testplot.png')
 
 elif args.flag_test == 'train':
+    data = loadmat("./custom_datasets/philip_data.mat")
     model, model_state_path, label_train_loader, criterion, optimizer, scheduler, label_test_loader = function_requirement(args.flag_test, data)
     print("Start training")
     tic = time.time()
