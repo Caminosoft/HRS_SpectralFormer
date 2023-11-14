@@ -27,4 +27,15 @@ List the dependencies needed to run the code. Instructions on how to install the
 
 ## How to Run
 
-Refer to readme to run the code as per the requirements.
+
+To Run the Model Training function with the provide custom data:
+
+`python demo.py --dataset='Custom' --flag_test='train' --epoches=10 --patches=3 --band_patches=3 --mode='CAF' --weight_decay=0`
+
+Note:
+
+Change the parameters as per the requirements.
+
+To Run the Inference function with the provided custom data:
+
+`python demo.py --dataset='Custom' --flag_test='inference' --epoches=10 --patches=3 --band_patches=3 --mode='CAF' --weight_decay=0`
