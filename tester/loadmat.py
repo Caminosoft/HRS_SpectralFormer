@@ -40,13 +40,13 @@ def compare_mat_files(file1_path, file2_path):
 
 
 # Example usage
-prediction_matrix = "/home/einn10184/PycharmProjects/IEEE_TGRS_SpectralFormer/data/matrix.mat"
-file2_path = "/home/einn10184/PycharmProjects/IEEE_TGRS_SpectralFormer/data/combined_data.mat"
-colormap = "/home/einn10184/PycharmProjects/IEEE_TGRS_SpectralFormer/data/AVIRIS_colormap.mat"
+prediction_matrix = "/home/innobit/Documents/work/HRS_SpectralFormer/output/matrix_Custom.mat"
+# file2_path = "/home/einn10184/PycharmProjects/IEEE_TGRS_SpectralFormer/data/combined_data.mat"
+colormap = "/home/innobit/Documents/work/HRS_SpectralFormer/data/AVIRIS_colormap.mat"
 
 # Load the content of the .mat files
 data1 = load_mat_file(prediction_matrix)
-data2 = load_mat_file(file2_path)
+# data2 = load_mat_file(file2_path)
 
 
 # Compare the content of the .mat files
